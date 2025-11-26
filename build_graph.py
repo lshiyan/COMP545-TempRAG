@@ -15,86 +15,59 @@ load_dotenv()
 def detect_gpu(request_gpu: bool) -> bool:
     return bool(request_gpu and torch.cuda.is_available())
 
-def load_tsv(path: str) -> List[str]:
+def load_edges(path: str) -> List[Tuple[str, ...]]:
     """
-    Loads a TSV file with exactly 4 columns per line:
-    head, relation, tail, ts
+    Loads a file where each line contains a tab separated TKG edge.
 
-    Returns a list of single-line strings where columns are separated by spaces:
-    "head relation tail ts"
+    Args:
+        path (str): Path to the TSV file.
+
+    Returns:
+        List[Tuple[str, ...]]: A list of tuples, one per line.
     """
     facts = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
-            if not line.strip():
+            line = line.strip()
+            if not line:
                 continue
-            cols = line.rstrip("\n").split("\t")
-            if len(cols) != 4:
-                raise ValueError(f"Invalid line (expected 4 columns): {line}")
-            # We later split on spaces, so we replace tabs with spaces here
-            facts.append(line.replace("\t", " ").strip())
+            parts = tuple(line.split("\t"))
+            if len(parts) != 4:
+                print("ERROR: Tuple should be length 4.")
+            facts.append(parts)
     return facts
 
-def build_texts(
-    texts: List[str],
-    tokenizer,
-    model,
-    batch_size: int = 128
-) -> List[str]:
+def load_sentences(path: str) -> List[str]:
     """
-    Converts edges into natural language sentences using a local HuggingFace Llama model.
-    No caching. Guaranteed positional alignment: sentences[i] corresponds to texts[i].
+    Loads a file and returns a list where each element is a line from the file,
+    stripped of leading/trailing whitespace.
+
+    Args:
+        path (str): Path to the file.
+
+    Returns:
+        List[str]: A list of lines.
     """
-    sentences: List[str] = []
+    lines = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                lines.append(line)
+    return lines
 
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
-
-        # Build prompts
-        prompts = [TEXT_REPR_EXTRACTION_PROMPT.format(edge=s) for s in batch]
-
-        # Tokenize
-        inputs = tokenizer(
-            prompts,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-        )
-        inputs = {k: v.to(model.device) for k, v in inputs.items()}
-
-        # Generate
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=60,
-                do_sample=False,
-                temperature=0.1,
-                eos_token_id=tokenizer.eos_token_id,
-            )
-
-        decoded = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-
-        # Extract answer after "Answer:" to mirror edge_to_nl behavior
-        for raw in decoded:
-            answer = raw.split("Answer:")[-1].strip()
-            sentences.append(answer)
-
-        print(f"[Llama] Processed {i + len(batch)}/{len(texts)} edges")
-
-    return sentences
-
-def embed_texts(
+def embed_sentences(
     model: SentenceTransformer,
-    texts: List[str],
-    batch_size: int,
-    use_gpu: bool
+    sentences: List[str],
+    batch_size: int = 128,
+    use_gpu: bool = False,
 ) -> np.ndarray:
     """
     Returns float32 np.array of shape (N, D) with L2-normalized rows.
     """
     device = "cuda" if use_gpu else "cpu"
     embeddings = model.encode(
-        texts,
+        sentences,
         batch_size=batch_size,
         convert_to_numpy=True,
         normalize_embeddings=True,
@@ -119,20 +92,13 @@ def build_faiss_index(embeddings: np.ndarray, use_gpu: bool) -> faiss.Index:
 
 def save_artifacts(
     outdir: str,
+    edges: List[Tuple],
     index: faiss.Index,
-    facts: List[str],
     sentences: List[str],
     save_embeddings: bool,
     embeddings: np.ndarray = None
 ):
     os.makedirs(outdir, exist_ok=True)
-
-    # Basic alignment sanity check
-    split_facts = [fact.split() for fact in facts]
-    if len(split_facts) != len(sentences):
-        raise ValueError(
-            f"Mismatch between facts ({len(split_facts)}) and sentences ({len(sentences)})."
-        )
 
     # Save FAISS index
     index_path = os.path.join(outdir, "index.faiss")
@@ -140,10 +106,8 @@ def save_artifacts(
 
     # Save metadata (ID-aligned with embeddings order: 0..N-1)
     metadata = []
-    for i, parts in enumerate(split_facts):
-        if len(parts) != 4:
-            raise ValueError(f"Fact at index {i} does not have 4 tokens: {parts}")
-        h, r, t, ts = parts
+    for i, tuple in enumerate(edges):
+        h, r, t, ts = tuple
         metadata.append(
             {
                 "id": i,
@@ -174,8 +138,15 @@ def main():
     parser.add_argument(
         "--input",
         required=True,
-        help="Path to TKG TSV file (head, relation, tail, ts).",
+        help="Path to tkg edges file.",
     )
+    
+    parser.add_argument(
+        "--sentences",
+        required=True,
+        help="Path to sentences file",
+    )
+    
     parser.add_argument(
         "--outdir",
         required=True,
@@ -206,37 +177,21 @@ def main():
         print("[Info] --use-gpu was requested but CUDA not available. Falling back to CPU.")
 
     print("[1/5] Loading TKG TSV...")
-    facts = load_tsv(args.input)
-    if not facts:
-        raise RuntimeError("No facts found in TSV.")
+    edges = load_edges(args.input)
+    sentences = load_sentences(args.sentences)
+    
+    if not sentences:
+        raise RuntimeError("No sentences found.")
 
     print(
         f"[2/5] Loading embedding model ({os.getenv('EMBEDDING_MODEL') or 'all-MiniLM-L6-v2'})..."
     )
     embedding_model = get_embedding_model()
-    tokenizer, llama_model = get_llama_tokenizer_and_model()
-
+    
     print(
-        f"[3/5] Generating NL for {len(facts)} facts and computing embeddings "
-        f"(batch_size={args.batch_size}, device={'cuda' if use_gpu else 'cpu'})..."
+        f"[3/5] Starting embeddings"
     )
-    sentences = build_texts(facts, tokenizer, llama_model)
-    
-    os.makedirs(args.outdir, exist_ok=True)
-    outfile = os.path.join(args.outdir, "sentences.txt")
-
-    with open(outfile, "w", encoding="utf-8") as f:
-        for s in sentences:
-            f.write(s + "\n")
-
-    print(f"Done. Saved {len(sentences)} sentences to {outfile}")
-    
-    """if len(sentences) != len(facts):
-        raise RuntimeError(
-            f"build_texts produced {len(sentences)} sentences for {len(facts)} facts."
-        )
-
-    embeddings = embed_texts(
+    embeddings = embed_sentences(
         embedding_model, sentences, args.batch_size, use_gpu
     )  # L2-normalized float32
 
@@ -244,14 +199,14 @@ def main():
     cpu_index = build_faiss_index(embeddings, use_gpu)
 
     print(f"[5/5] Saving artifacts to {args.outdir} ...")
-    save_artifacts(args.outdir, cpu_index, facts, sentences, args.save_embeddings, embeddings)
+    save_artifacts(args.outdir, cpu_index, sentences, args.save_embeddings, embeddings)
 
     print("Done.")
     print(f" - Index:      {os.path.join(args.outdir, 'index.faiss')}")
     print(f" - Metadata:   {os.path.join(args.outdir, 'metadata.json')}")
     if args.save_embeddings:
         print(f" - Embeddings: {os.path.join(args.outdir, 'embeddings.npy')}")
-    print(f"Index size: {cpu_index.ntotal}")"""
+    print(f"Index size: {cpu_index.ntotal}") 
 
 if __name__ == "__main__":
     main()

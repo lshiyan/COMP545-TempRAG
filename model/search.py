@@ -1,9 +1,11 @@
 import faiss
 import numpy as np
 import json
+import re
 
 from dotenv import load_dotenv
 from const import get_embedding_model
+from datetime import datetime
 
 load_dotenv()
 
@@ -54,14 +56,14 @@ class IndexSearch():
 
         for doc in retrieved_docs:
             cand_ts = doc["timestamp"]
-            cand_dt, _ = parse_date_auto(cand_ts)
+            cand_dt, _ = self.parse_date_auto(cand_ts)
 
             keep = True
 
             for constraint_type in constraints:
 
                 constraint_str = constraints[constraint_type]
-                constraint_dt, constraint_grain = parse_date_auto(constraint_str)
+                constraint_dt, constraint_grain = self.parse_date_auto(constraint_str)
 
                 if constraint_type == "after":
                     if not self.is_after(cand_dt, constraint_dt, constraint_grain):
@@ -80,7 +82,7 @@ class IndexSearch():
 
         return filtered_docs
 
-    def parse_date_auto(date: str) -> datetime | str:
+    def parse_date_auto(self, date: str) -> datetime | str:
         """
         Parses a string representing a time, day, month, or year, and returns a datetime object and a granularity string.
         
@@ -91,7 +93,7 @@ class IndexSearch():
             dt (datetime): A datetime object representing the date.
             gran_s (str): A string specifying the granularity of the date.
         """
-        s = s.strip()
+        s = date.strip()
 
         # FULL DATE: YYYY-MM-DD → day-level
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
@@ -105,7 +107,7 @@ class IndexSearch():
         if re.fullmatch(r"\d{4}", s):
             return datetime.strptime(s + "-01-01", "%Y-%m-%d"), "year"
         
-    def is_after(self, cand_dt, constraint_dt, constraint_grain) -> bool:
+    def is_after(self, cand_dt: datetime , constraint_dt: datetime, constraint_grain: str) -> bool:
         """
         Returns whether cand_dt occurs strictly after constraint_dt,
         interpreted at the proper granularity.
@@ -133,7 +135,7 @@ class IndexSearch():
             return cand_dt > constraint_dt
 
 
-    def is_before(self, cand_dt, constraint_dt, constraint_grain) -> bool:
+    def is_before(self, cand_dt: datetime, constraint_dt: datetime, constraint_grain: str) -> bool:
         """
         Returns whether cand_dt occurs strictly before constraint_dt,
         interpreted at the appropriate granularity.
@@ -161,7 +163,7 @@ class IndexSearch():
             return cand_dt < constraint_dt
 
 
-    def is_on(self, cand_dt, constraint_dt, constraint_grain) -> bool:
+    def is_on(self, cand_dt: datetime, constraint_dt: datetime, constraint_grain: str) -> bool:
         """
         Returns whether cand_dt occurs exactly ON the constraint date,
         interpreted at the appropriate granularity.
@@ -187,24 +189,3 @@ class IndexSearch():
         # DAY-level: full exact match
         if constraint_grain == "day":
             return cand_dt == constraint_dt
-
-if __name__ == "__main__":
-    from datetime import datetime
-    import re
-    
-    def parse_date_auto(s: str) -> datetime:
-        s = s.strip()
-
-        # FULL DATE: YYYY-MM-DD
-        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
-            return datetime.strptime(s, "%Y-%m-%d")
-
-        # YEAR + MONTH: YYYY-MM
-        if re.fullmatch(r"\d{4}-\d{2}", s):
-            return datetime.strptime(s + "-01", "%Y-%m-%d")
-
-        # YEAR ONLY: YYYY
-        if re.fullmatch(r"\d{4}", s):
-            return datetime.strptime(s + "-01-01", "%Y-%m-%d")
-    
-    print(parse_date_auto("2024"))

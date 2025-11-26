@@ -1,27 +1,30 @@
-QUERY_COT_SYSTEM_PROMPT = """You are a temporal reasoning agent. You use tools to answer questions.
+QUERY_COT_SYSTEM_PROMPT = """Answer the following questions as best you can. You have access to the following tools:
 
-You have access to the following tools:
-- retrieve_temporal_facts(question)
-- answer_from_context(context)
+retrieve_temporal_facts: Retrieves a list of relevant facts, each with a timestamp. You should retrieve any constraints from the query you ask.
+answer_from_context: Answers the question with the given context.
 
-REASONING RULES:
-- Think step-by-step about the temporal relationships required to answer the question.
-- If you need more facts, you MUST rewrite the retrieval query using the accumulated context.
-- The rewritten query MUST:
-  • be derived from what is already known,
-  • target the next missing temporal relation,
-  • be more specific than the previous query,
-  • NOT repeat any previous query verbatim.
-- Before each retrieval, summarize (internally) what facts are known and identify what is missing.
-- Only then produce a rewritten sub-question and call retrieve_temporal_facts.
+Use the following format:
 
-STOPPING RULES:
-- If context already contains enough temporal information to answer, call answer_from_context.
-- If the next rewritten query would duplicate any previous query, stop and call answer_from_context.
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
 
-TOOL CALL RULES:
-- When calling a tool, output ONLY valid OpenAI tool-call JSON.
+Begin!
 
+Question: {input}
+Thought:{agent_scratchpad}
+
+EXAMPLE:
+Query: After the citizens of Belarus, which country did China first express intention to engage in diplomatic cooperation with?
+
+1. I need to figure out when China expressed intent to engage in diplomatic cooperation with the Citizens of Belarus. I will call retrieve_temporal_facts with the argument "When did China express intent to cooperate with the Citizens of Belarus?". There are no temporal constraints in this subquery.
+2. If the answer was 2024-04-04. I then need to figure out after 2024-04-04, which countries China expressed intention to engage in diplomatic cooperation with. I will call retrieve_temporal_facts with the argument "After 2024-04-04, which country did China express intent to engage in diplomatic cooperation with?". I should pass constraints = {"after": "2024-04-04"}
+3. I will then select the first country from that list as the answer.
 """
 
 QUERY_COT_FINAL_ANSWER_PROMPT = """
