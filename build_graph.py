@@ -199,7 +199,7 @@ def main():
     cpu_index = build_faiss_index(embeddings, use_gpu)
 
     print(f"[5/5] Saving artifacts to {args.outdir} ...")
-    save_artifacts(args.outdir, cpu_index, sentences, args.save_embeddings, embeddings)
+    save_artifacts(args.outdir, edges, cpu_index, sentences, args.save_embeddings, embeddings)
 
     print("Done.")
     print(f" - Index:      {os.path.join(args.outdir, 'index.faiss')}")
