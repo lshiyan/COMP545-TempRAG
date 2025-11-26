@@ -136,7 +136,7 @@ def main():
         description="Build a FAISS index over a Temporal Knowledge Graph TSV."
     )
     parser.add_argument(
-        "--input",
+        "--edges",
         required=True,
         help="Path to tkg edges file.",
     )
@@ -177,7 +177,7 @@ def main():
         print("[Info] --use-gpu was requested but CUDA not available. Falling back to CPU.")
 
     print("[1/5] Loading TKG TSV...")
-    edges = load_edges(args.input)
+    edges = load_edges(args.edges)
     sentences = load_sentences(args.sentences)
     
     if not sentences:
