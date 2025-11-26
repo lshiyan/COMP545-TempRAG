@@ -33,13 +33,14 @@ class IndexSearch():
             
         return metadata
     
-    def search_index(self, query: str, constraints: dict,  top_k: int = 10) -> list:
+    def search_index(self, query: str, constraints: dict,  sorting: str, top_k: int = 100) -> list:
         """
         Performs a semantic similarity search on the index. Filters output by temporal constraints.
         
         Args:
             metadata_path (str): The path to the metadata json file.
             constraints (dict): A dictionary of constraints, keys are 'after', 'before', 'on'.
+            sorting (str): The string to sort by, can be "first", "last", or "none".
         
         Returns:
             filtered_docs (list): The list containing the top_k matches, ordered by similarity, and filtered by constraints.
@@ -78,9 +79,15 @@ class IndexSearch():
                         keep = False
 
             if keep:
-                filtered_docs.append(doc)
+                filtered_docs.append((cand_dt, doc["text"]))
 
-        return filtered_docs
+        if sorting == "first":
+            filtered_docs.sort(key=lambda x: x[0])
+        elif sorting == "last":
+            filtered_docs.sort(key=lambda x: x[0], reverse=True)
+            
+        final_docs = [text for _, text in filtered_docs]
+        return final_docs
 
     def parse_date_auto(self, date: str) -> datetime | str:
         """
@@ -189,3 +196,10 @@ class IndexSearch():
         # DAY-level: full exact match
         if constraint_grain == "day":
             return cand_dt == constraint_dt
+    
+if __name__ == "__main__":
+    search = IndexSearch("data/tkg/MultiTQ/full/full_index.faiss","data/tkg/MultiTQ/full/full_metadata.json")
+    
+    x = search.search_index("Which person visited China before 2013-10-30?", constraints={"before": "2013-10-30"}, sorting = "last", top_k = 10000)
+    print(len(x))
+    print(x[:50])
