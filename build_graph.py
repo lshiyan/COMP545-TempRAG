@@ -116,6 +116,7 @@ def save_artifacts(
                 "tail": t,
                 "timestamp": ts,
                 "text": sentences[i],
+                "edge": " ".join(tuple)
             }
         )
 
