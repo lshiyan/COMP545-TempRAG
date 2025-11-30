@@ -12,14 +12,14 @@ load_dotenv()
 def get_retrieval_tool(search: IndexSearch, top_k: int = 10, retrieval: int = 50):
     
     @tool
-    def retrieve_temporal_facts(query: str, constraints: dict, sorting: str, retrieval: int) -> list:
+    def retrieve_temporal_facts(query: str, constraints: dict, sorting: str) -> list:
         """
         Return a list of the top_k matches for the query, ordered by semantic similarity.
         
         Args:
             query (str): The query or subquery to answer. Must be a question.
-            constraints (dict): A dictionary of constraints to filter the results by. Constraints can either be 'before', 'after', or 'on'.
-            sorting (str): A string representing the type of sorting, if applicable. Sorting can be 'first', 'last', or 'none'.
+            constraints (dict): A dictionary of constraints to filter the results by. Constraints can be 'before', 'after', or 'on'. If there are no constraints, input an empty dictionary.
+            sorting (str): A string representing the type of sorting, if applicable. Sorting can be 'first', 'last'. If there are no sorts needed, input an empty string.
             retrieval (int): The amount of documents to return after filtering and sorting.
         
         Returns:
