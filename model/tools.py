@@ -4,12 +4,13 @@ from model.search import IndexSearch
 from dotenv import load_dotenv
 from prompts.query_cot import QUERY_COT_FINAL_ANSWER_PROMPT
 from typing import List
+from model.reranker import Reranker
 import os
 
 load_dotenv()
 
 #Has to be this way since IndexSearch is not serializable, tool arguments must be primitive.
-def get_retrieval_tool(search: IndexSearch, top_k: int = 10, retrieval: int = 50):
+def get_retrieval_tool(search: IndexSearch, rr: Reranker, similarity_top_k: int = 10, rerank_top_k: int = 50):
     
     @tool
     def retrieve_temporal_facts(query: str, constraints: dict, sorting: str) -> list:
@@ -20,14 +21,15 @@ def get_retrieval_tool(search: IndexSearch, top_k: int = 10, retrieval: int = 50
             query (str): The query or subquery to answer. Must be a question.
             constraints (dict): A dictionary of constraints to filter the results by. Constraints can be 'before', 'after', or 'on'. If there are no constraints, input an empty dictionary.
             sorting (str): A string representing the type of sorting, if applicable. Sorting can be 'first', 'last'. If there are no sorts needed, input an empty string.
-            retrieval (int): The amount of documents to return after filtering and sorting.
+            similarity_top_k (int): The amount of documents to return after FAISS search.
+            rerank_top_k (int): The amount of documents to keep after reranking.
         
         Returns:
-            A list of the top_k most similar semantic matches to the query. The format will be [match1, match2,]
+            A list of the most relevant documents to the query. The format will be [match1, match2,]
         """
-        results = search.search_index(query, constraints, sorting, top_k = top_k)
+        results = search.search_index(query, constraints, sorting = sorting, rr = rr, similarity_top_k = similarity_top_k, rerank_top_k = rerank_top_k)
 
-        return {'context':results[:retrieval]}
+        return {'context': results}
 
     return retrieve_temporal_facts
 

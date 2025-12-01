@@ -6,6 +6,7 @@ import re
 from dotenv import load_dotenv
 from const import get_embedding_model
 from datetime import datetime
+from model.reranker import Reranker
 
 load_dotenv()
 
@@ -33,14 +34,16 @@ class IndexSearch():
             
         return metadata
     
-    def search_index(self, query: str, constraints: dict,  sorting: str, top_k: int = 100) -> list:
+    def search_index(self, query: str, constraints: dict, sorting: str, rr: Reranker = None, similarity_top_k: int = 1000, rerank_top_k = 50) -> list:
         """
         Performs a semantic similarity search on the index. Filters output by temporal constraints.
         
         Args:
-            metadata_path (str): The path to the metadata json file.
             constraints (dict): A dictionary of constraints, keys are 'after', 'before', 'on'.
-            sorting (str): The string to sort by, can be "first", "last", or "none".
+            similarity_top_k (int): The amount of semantic similarity searches to keep. 
+            rerank_top_k (int): The amount of reranked documents to keep.
+            rr (Reranker): If specified, will rerank the candidate documents according to the query.
+            sorting (str): Will sort the documents by first / last time.
         
         Returns:
             filtered_docs (list): The list containing the top_k matches, ordered by similarity, and filtered by constraints.
@@ -50,7 +53,7 @@ class IndexSearch():
         embeddings = model.encode(query, convert_to_numpy=True, normalize_embeddings=True,)
         embeddings = np.array([embeddings]).astype("float32")
         
-        _, ids = self.index.search(embeddings, top_k)
+        _, ids = self.index.search(embeddings, similarity_top_k)
         
         filtered_docs = []
         retrieved_docs = [self.metadata[i] for i in ids[0]]
@@ -81,14 +84,30 @@ class IndexSearch():
             if keep:
                 filtered_docs.append((cand_dt, doc["text"]))
 
-        if sorting == "first":
-            filtered_docs.sort(key=lambda x: x[0])
-        elif sorting == "last":
-            filtered_docs.sort(key=lambda x: x[0], reverse=True)
+        final_docs = [(dt, text) for dt, text in filtered_docs]
+        
+        if rr:
+            texts = [text for _, text in filtered_docs]
             
-        final_docs = [text for _, text in filtered_docs]
-        return final_docs
-
+            if texts:  
+                reranked = rr.rerank(query, texts, rerank_top_k)
+                
+                text_to_dt = {text: dt for dt, text in filtered_docs}
+                
+                final_docs = [(text_to_dt[text], text) for text in reranked]
+            else:
+                final_docs = []
+        else:
+            final_docs = [(dt, text) for dt, text in filtered_docs]
+            
+        if sorting == "first":
+            final_docs.sort(key=lambda x: x[0])  # Sort by datetime, earliest first
+        elif sorting == "last":
+            final_docs.sort(key=lambda x: x[0], reverse=True)
+            
+        result = [text for _, text in final_docs]
+        return result
+    
     def parse_date_auto(self, date: str) -> datetime | str:
         """
         Parses a string representing a time, day, month, or year, and returns a datetime object and a granularity string.
@@ -196,10 +215,3 @@ class IndexSearch():
         # DAY-level: full exact match
         if constraint_grain == "day":
             return cand_dt == constraint_dt
-    
-if __name__ == "__main__":
-    search = IndexSearch("data/tkg/MultiTQ/full/full_index.faiss","data/tkg/MultiTQ/full/full_metadata.json")
-    
-    x = search.search_index("Which person visited China before 2013-10-30?", constraints={"before": "2013-10-30"}, sorting = "last", top_k = 10000)
-    print(len(x))
-    print(x[:50])
