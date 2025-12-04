@@ -56,7 +56,8 @@ def parse_args():
     parser.add_argument(
         "--sample_by",
         type=str,
-        choices=["answer_type", "time_level", "qtype", "qlabel"],
+        default="any",
+        choices=["answer_type", "time_level", "qtype", "qlabel", "any"],
         help="Field to group questions by before sampling"
     )
 
@@ -69,31 +70,40 @@ def parse_args():
 
     return parser.parse_args()
 
-def sample_questions(questions: list[dict], field: str, n: int) -> list[dict]:
+def sample_questions(questions: list[dict], field: str, n: int) ->  list[dict]:
     """
-    Randomly samples questions based on specific field.
-    
+    Sample questions based on the given field.
+
+    If field == "any":
+        Randomly sample n questions from the full dataset.
+
+    Else:
+        Sample n questions for EACH distinct value in that field.
+
     Args:
-        questions (list[dict]): A list of question dicts.
-        field (str): The field to sample on, can be ["answer_type", "time_level", "qtype", "qlabel"].
-        n (int): The amount of questions to sample.
-        
-    Returns: 
-        samples (list[dict]): A list of the samples questions.
+        questions (list[dict]): List of question dicts.
+        field (str): One of ["answer_type", "time_level", "qtype", "qlabel", "any"].
+        n (int): Number of samples to draw.
+
+    Returns:
+        list[dict]: Sampled questions.
     """
+
+    if field == "any":
+        k = min(n, len(questions))
+        return random.sample(questions, k)
+
     groups = defaultdict(list)
     for q in questions:
         key = q[field]
         groups[key].append(q)
 
-    # randomly select a group key
-    chosen_key = random.choice(list(groups.keys()))
-    chosen_group = groups[chosen_key]
+    sampled = []
+    for key, group in groups.items():
+        k = min(n, len(group))
+        sampled.extend(random.sample(group, k))
 
-    if n > len(chosen_group):
-        n = len(chosen_group)
-
-    return random.sample(chosen_group, n)
+    return sampled
 
 def main():
     args = parse_args()
@@ -107,6 +117,7 @@ def main():
             field=args.sample_by,
             n=args.sample_n
         )
+    
     rr = Reranker()
     search = IndexSearch(args.index, args.metadata)
 
