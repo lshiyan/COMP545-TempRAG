@@ -33,13 +33,6 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--max",
-        type=int,
-        default=5,
-        help="Maximum number of questions to run"
-    )
-
-    parser.add_argument(
         "--similarity_top_k",
         type=int,
         default=10,
@@ -133,7 +126,7 @@ def main():
 
     query_agent = QueryAgent(tools, QUERY_COT_SYSTEM_PROMPT)
 
-    for i, question in enumerate(questions):
+    for _, question in enumerate(questions):
         query = question["question"]
         gold_answers = question["answers"]
 
@@ -143,9 +136,6 @@ def main():
         print(answer_dict)
         if answer_dict["correct"]:
             print("Correct!")
-
-        if i + 1 >= args.max:
-            break
 
 if __name__ == "__main__":
     main()
