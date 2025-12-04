@@ -13,7 +13,7 @@ load_dotenv()
 def get_retrieval_tool(search: IndexSearch, rr: Reranker, similarity_top_k: int = 10, rerank_top_k: int = 50):
     
     @tool
-    def retrieve_temporal_facts(query: str, constraints: dict, sorting: str) -> list:
+    def retrieve_temporal_facts(query: str, constraints: dict = {}, sorting: str = "") -> list:
         """
         Return a list of the top_k matches for the query, ordered by semantic similarity.
         
