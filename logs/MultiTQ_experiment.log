@@ -2,4 +2,122 @@
 The following have been reloaded with a version change:
   1) python/3.11.5 => python/3.10.13
 
-slurmstepd: error: *** JOB 53058167 ON ng11102 CANCELLED AT 2025-12-04T18:51:48 ***
+Traceback (most recent call last):
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 101, in handle_request
+    raise exc
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 78, in handle_request
+    stream = self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 124, in _connect
+    stream = self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_backends/sync.py", line 207, in connect_tcp
+    with map_exceptions(exc_map):
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.11.5/lib/python3.11/contextlib.py", line 155, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectTimeout: [Errno 110] Connection timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/openai/_base_client.py", line 982, in request
+    response = self._client.send(
+               ^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Compiler/gcccore/python/3.11.5/lib/python3.11/contextlib.py", line 155, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectTimeout: [Errno 110] Connection timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/experiments/MultiTQ.py", line 138, in <module>
+    main()
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/experiments/MultiTQ.py", line 133, in main
+    answer = query_agent.run_agent(query)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/model/agent.py", line 54, in run_agent
+    for chunk in self.agent.stream(initial_state, stream_mode="updates"):
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langgraph/pregel/main.py", line 2643, in stream
+    for _ in runner.tick(
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langgraph/pregel/_runner.py", line 167, in tick
+    run_with_retry(
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langgraph/pregel/_retry.py", line 42, in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langgraph/_internal/_runnable.py", line 656, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langgraph/_internal/_runnable.py", line 400, in invoke
+    ret = self.func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain/agents/factory.py", line 1129, in model_node
+    response = _execute_model_sync(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain/agents/factory.py", line 1102, in _execute_model_sync
+    output = model_.invoke(messages)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_core/runnables/base.py", line 5534, in invoke
+    return self.bound.invoke(
+           ^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_core/language_models/chat_models.py", line 398, in invoke
+    self.generate_prompt(
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_core/language_models/chat_models.py", line 1117, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_core/language_models/chat_models.py", line 927, in generate
+    self._generate_with_cache(
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_core/language_models/chat_models.py", line 1221, in _generate_with_cache
+    result = self._generate(
+             ^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_openai/chat_models/base.py", line 1356, in _generate
+    raise e
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/langchain_openai/chat_models/base.py", line 1351, in _generate
+    raw_response = self.client.with_raw_response.create(**payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/openai/_legacy_response.py", line 364, in wrapped
+    return cast(LegacyAPIResponse[R], func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/openai/_utils/_utils.py", line 286, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/openai/resources/chat/completions/completions.py", line 1189, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/openai/_base_client.py", line 1259, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre06/project/6067888/shiyanl/COMP545_project/.venv/lib/python3.11/site-packages/openai/_base_client.py", line 1000, in request
+    raise APITimeoutError(request=request) from err
+openai.APITimeoutError: Request timed out.
+During task with name 'model' and id '4bfdb4b8-fdba-ba7e-f6da-78a5ecc4d03e'
+Finished at: Thu Dec  4 14:33:19 EST 2025

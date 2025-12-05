@@ -131,11 +131,8 @@ def main():
         gold_answers = question["answers"]
 
         answer = query_agent.run_agent(query)
-        answer_dict = query_agent.evaluate_agent_answer(answer, gold_answers)
-        
+        answer_dict = {"query": query, "answer": answer, "gold_answers": gold_answers} 
         print(answer_dict)
-        if answer_dict["correct"]:
-            print("Correct!")
 
 if __name__ == "__main__":
     main()
