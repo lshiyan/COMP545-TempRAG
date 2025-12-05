@@ -19,8 +19,7 @@ _llama_model = None
 def get_openai_client():
     global _client
     if _client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        _client = OpenAI(api_key)
+        _client = OpenAI()
     return _client
 
 def get_embedding_model():
