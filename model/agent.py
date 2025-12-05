@@ -93,6 +93,17 @@ class QueryAgent():
             input = JUDGE_ANSWER_PROMPT.format(query = query, answer = answer, gold_answers= str(gold_answers))
         )
         
-        responses_dict = response.output[1].content[0].text
+        responses_text = response.output[1].content[0].text
+        
+        try:
+            responses_dict = json.loads(responses_text)
+        except json.JSONDecodeError:
+            try:
+                # Find JSON substring
+                start = responses_text.find("{")
+                end = responses_text.rfind("}") + 1
+                responses_dict = json.loads(responses_text[start:end])
+            except Exception:
+                raise ValueError(f"LLM returned non-JSON:\n{responses_text}")
         
         return responses_dict
