@@ -42,37 +42,47 @@ class Reranker:
         return f"Query: {query}\nDocument: {doc}\nRelevant:"
 
     @torch.no_grad()
-    def score_batch(self, query: str, docs: List[str]) -> List[float]:
+    def score_batch(self, query: str, docs: List[str], batch_size: int = 128) -> List[float]:
         """
-        Computes pointwise relevance scores for a batch of (query, doc) pairs.
+        Computes pointwise relevance scores for a batch of (query, doc) pairs, using smaller batches.
 
         Args:
             query (str): The decomposed subquery from your agent
             docs (List[str]): A list of candidate documents/edge texts
+            batch_size (int): Number of docs to score per forward pass
 
         Returns:
             List[float]: Relevance scores (0-1) aligned with input order
         """
-        prompts = [self._format_prompt(query, doc) for doc in docs]
-        
-        inputs = self.tokenizer(
-            prompts,
-            return_tensors="pt",
-            truncation=True,
-            padding=True,
-            max_length=64 #NOTE: Might have to change this depending on if we have longer documents or not.
-        ).to(self.device)
+        all_scores = []
 
-        outputs = self.model(**inputs)
-        logits = outputs.logits[:, -1, :]  # Shape: (batch_size, vocab_size)
-        
-        yes_logits = logits[:, self.yes_token_id]
-        no_logits = logits[:, self.no_token_id]
+        for start in range(0, len(docs), batch_size):
+            end = start + batch_size
+            batch_docs = docs[start:end]
 
-        scores_tensor = torch.stack([no_logits, yes_logits], dim=1)
-        probs = F.softmax(scores_tensor, dim=1)[:, 1]
-        
-        return probs.cpu().tolist()
+            prompts = [self._format_prompt(query, doc) for doc in batch_docs]
+
+            inputs = self.tokenizer(
+                prompts,
+                return_tensors="pt",
+                truncation=True,
+                padding=True,
+                max_length=64
+            ).to(self.device)
+
+            outputs = self.model(**inputs)
+            logits = outputs.logits[:, -1, :]  # Shape: (batch_size, vocab_size)
+
+            yes_logits = logits[:, self.yes_token_id]
+            no_logits = logits[:, self.no_token_id]
+
+            scores_tensor = torch.stack([no_logits, yes_logits], dim=1)
+            probs = F.softmax(scores_tensor, dim=1)[:, 1]
+
+            all_scores.extend(probs.cpu().tolist())
+
+        return all_scores
+
 
     @torch.no_grad()
     def rerank(self, query: str, candidates: List[str], top_k: int = None) -> List[Tuple[str, float]]:
