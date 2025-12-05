@@ -60,16 +60,14 @@ Final Answer: <the final answer to the original Query. MUST be a single span. If
 
 Query: After the citizens of Belarus, which country did China first express intention to engage in diplomatic cooperation with?
 
-Thought: I need the date when China expressed intention to cooperate with the citizens of Belarus.
+Thought: I need the date when China expressed intention to cooperate with the citizens of Belarus. I do not need any constraints or sorting.
 Action: retrieve_temporal_facts
-Action Input: "When did China express intent to cooperate with the citizens of Belarus?"
+Action Input: {"query":"When did China express intent to cooperate with the citizens of Belarus?", constraints = {}, sorting = ""}
 Observation: ["China intends to engage in diplomatic cooperation with Citizens of Belarus on 2024-04-04."]
 
 Thought: Now I know the reference date is 2024-04-04. I need to find the FIRST country China cooperated with AFTER that date.
 Action: retrieve_temporal_facts
-Action Input: "Which country did China express intent to cooperate with?"
-Constraints = {"after": "2024-04-04"}
-Sorting = "first"
+Action Input: {"query": "Which country did China express intent to cooperate with?", constraints = {"after": "2024-04-04"}, sorting = "first"}
 Observation: ["China intends to engage in diplomatic cooperation with CountryX on 2024-05-01."]
 
 Thought: I now know the final answer
