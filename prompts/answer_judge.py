@@ -26,6 +26,7 @@ OUTPUT FORMAT:
 Return a JSON dictionary with the following fields:
 
 {{
+  "query": "{query}",
   "final_answer": "{answer}",
   "gold_answers": {gold_answers},
   "correct": "<YES or NO>"

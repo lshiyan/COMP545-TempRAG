@@ -73,11 +73,12 @@ class QueryAgent():
             
         return final_answer.split(FINAL_ANSWER)[-1].strip()
 
-    def evaluate_agent_answer(self, answer: str, gold_answers: list) -> dict:
+    def evaluate_agent_answer(self, query: str, answer: str, gold_answers: list) -> dict:
         """
         Uses an LLM to judge whether the given answer is one of the gold answers.
         
         Args:
+            query (str): The query to answer.
             answer (str): The answer the agent computes.
             gold_answer (list): A list of all the gold answers.
         
@@ -89,7 +90,7 @@ class QueryAgent():
         
         response = client.responses.create(
             model = os.getenv("PROCESSING_MODEL"), 
-            input = JUDGE_ANSWER_PROMPT.format(answer = answer, gold_answers= str(gold_answers))
+            input = JUDGE_ANSWER_PROMPT.format(query = query, answer = answer, gold_answers= str(gold_answers))
         )
         
         responses_dict = response.output[1].content[0].text

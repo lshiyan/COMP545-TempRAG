@@ -142,11 +142,20 @@ def main():
         gold_answers = question["answers"]
 
         answer = query_agent.run_agent(query)
-        answer_dict = {"query": query, "answer": answer, "gold_answers": gold_answers} 
+        answer_dict = query_agent.evaluate_agent_answer(query, answer, gold_answers)
+        
+        correct = answer_dict["correct"]
         
         print("Result:", flush=True)
         print(json.dumps(answer_dict, indent=2), flush=True)
+        
+        if correct == "YES":
+            print("CORRECT ANSWER", flush = True)
+        else:
+            print("INCORRECT ANSWER", flush = True)
+            
         print(f"Time taken: {time() - start_time:.2f} seconds", flush=True)
+
 
 if __name__ == "__main__":
     print("Starting MultiTQ experiment...", flush=True)
