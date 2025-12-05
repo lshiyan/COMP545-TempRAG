@@ -1,6 +1,7 @@
 import json
 import argparse
 import random
+from time import time
 from model.agent import QueryAgent
 from model.reranker import Reranker
 from model.search import IndexSearch
@@ -99,11 +100,15 @@ def sample_questions(questions: list[dict], field: str, n: int) ->  list[dict]:
     return sampled
 
 def main():
-    args = parse_args()
 
+
+    args = parse_args()
+    
+    print("Loading questions...", flush=True)
     with open(args.questions, "r") as q:
         questions = json.load(q)
-
+ 
+    print(f"Total questions loaded: {len(questions)}", flush=True)
     if args.sample_by and args.sample_n:
         questions = sample_questions(
             questions,
@@ -111,6 +116,7 @@ def main():
             n=args.sample_n
         )
     
+    print(f"Total questions after sampling: {len(questions)}", flush=True)
     rr = Reranker()
     search = IndexSearch(args.index, args.metadata)
 
@@ -126,15 +132,22 @@ def main():
 
     query_agent = QueryAgent(tools, QUERY_COT_SYSTEM_PROMPT)
 
-    for _, question in enumerate(questions):
+    for i, question in enumerate(questions):
+
+        start_time = time()
+        print(
+            f"Processing question {i + 1} / {len(questions)}"
+        )
         query = question["question"]
         gold_answers = question["answers"]
 
         answer = query_agent.run_agent(query)
         answer_dict = {"query": query, "answer": answer, "gold_answers": gold_answers} 
-        print(answer_dict)
+        
+        print("Result:", flush=True)
+        print(json.dumps(answer_dict, indent=2), flush=True)
+        print(f"Time taken: {time() - start_time:.2f} seconds", flush=True)
 
 if __name__ == "__main__":
+    print("Starting MultiTQ experiment...", flush=True)
     main()
-
-    
