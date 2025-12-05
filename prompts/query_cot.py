@@ -36,7 +36,7 @@ Observation: <the result returned by the tool>
 When you have enough information to answer:
 
 Thought: I now know the final answer
-Final Answer: <the final answer to the original Query. MUST be a single span. If the question asks for a month, give the year and month. I.e. 2005-09. If unknown, return "Unknown">
+Final Answer: <the final answer to the original Query. MUST be a single span. If the question asks for a month, give the year and month. I.e. 2005-08. If unknown, return "Unknown">
 
 ==================================================================
 
@@ -78,4 +78,17 @@ Final Answer: CountryX
 ==================================================================
 
 Begin.
+"""
+
+QUERY_COT_FINAL_ANSWER_PROMPT = """
+You are a temporal reasoning assistant.
+
+Here are the retrieved facts (edges):
+{context_str}
+
+Question: {question}
+
+Using ONLY the provided context, give the final answer.
+If the answer is not derivable, say 'Unknown'.
+Respond with ONLY the answer, no explanation.
 """
