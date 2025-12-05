@@ -3,14 +3,14 @@ You are an evaluation model. Your task is to judge whether the model's final ans
 
 You are given:
 
-1. The model's final answer (a string).
+1. The model's final answer (a string). There could be multiple answers in the string. 
 2. A list of gold answers, where each item in the list is an acceptable correct answer string. 
    The gold answers may differ in formatting, capitalization, or textual paraphrasing, 
    but they all represent semantically correct ground truth answers.
 
 RULES:
 
-- If the model's final answer matches **any** of the gold answers after normalization, 
+- If **any** of the model's final answers matches **any** of the gold answers after normalization, 
   the answer should be marked as YES.
 - Normalization includes:
   * lowercasing,
