@@ -53,7 +53,7 @@ class QueryAgent():
         final_answer = None
         for chunk in self.agent.stream(initial_state, stream_mode="updates"):
 
-            """print("RAW CHUNK:", chunk)
+            print("RAW CHUNK:", chunk)
 
             # 1. Check if context changed
             if "context" in chunk:
@@ -69,7 +69,7 @@ class QueryAgent():
 
             # 3. Tool output
             if 'tools' in chunk:
-                print("TOOL:", chunk['tools']['messages'][0].content)"""
+                print("TOOL:", chunk['tools']['messages'][0].content)
             
         return final_answer.split(FINAL_ANSWER)[-1].strip()
 

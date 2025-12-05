@@ -1,6 +1,6 @@
 QUERY_COT_SYSTEM_PROMPT = """Answer the following questions as best you can. You have access to the following tools:
 
-retrieve_temporal_facts: Retrieves a list of relevant facts, each with a timestamp. You should retrieve any constraints from the query you ask. The input to this function MUST be a question.
+retrieve_temporal_facts: Retrieves a list of relevant facts, each with a timestamp. You should retrieve any constraints from the query you ask, DO NOT mention them in the query. The query MUST be a question.
 answer_from_context: Answers the question with the given context.
 
 Use the following format:
