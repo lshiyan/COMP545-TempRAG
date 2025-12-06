@@ -139,30 +139,35 @@ def main():
 
     # Process questions
     for i, question in enumerate(questions):
-        start_time = time()
-        print(f"Processing question {i + 1} / {len(questions)}", flush=True)
+        try: 
+            start_time = time()
+            print(f"Processing question {i + 1} / {len(questions)}", flush=True)
 
-        query = question["question"]
-        gold_answers = question["answers"]
+            query = question["question"]
+            gold_answers = question["answers"]
 
-        answer = query_agent.run_agent(query)
-        answer_dict = query_agent.evaluate_agent_answer(query, answer, gold_answers)
+            answer = query_agent.run_agent(query)
+            answer_dict = query_agent.evaluate_agent_answer(query, answer, gold_answers)
 
-        correct = answer_dict["correct"]
-        group_key = get_group_key(question)
+            correct = answer_dict["correct"]
+            group_key = get_group_key(question)
 
-        group_stats[group_key]["total"] += 1
-        if correct == "YES":
-            group_stats[group_key]["correct"] += 1
-            print("CORRECT ANSWER", flush=True)
-        else:
-            print("INCORRECT ANSWER", flush=True)
+            group_stats[group_key]["total"] += 1
+            if correct == "YES":
+                group_stats[group_key]["correct"] += 1
+                print("CORRECT ANSWER", flush=True)
+            else:
+                print("INCORRECT ANSWER", flush=True)
 
-        print("Result:")
-        print(json.dumps(answer_dict, indent=2), flush=True)
-        print(f"Time taken: {time() - start_time:.2f} seconds", flush=True)
-        print("-" * 50, flush=True)
-
+            print("Result:")
+            print(json.dumps(answer_dict, indent=2), flush=True)
+            print(f"Time taken: {time() - start_time:.2f} seconds", flush=True)
+            print("-" * 50, flush=True)
+        except Exception as e:
+            print(f"Error processing question {i + 1}: {e}", flush=True)
+            print("-" * 50, flush=True)
+            continue
+            
     # Print group performance summary
     print("\n================= PERFORMANCE BY GROUP =================\n")
 

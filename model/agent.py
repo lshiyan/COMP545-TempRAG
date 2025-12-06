@@ -55,21 +55,21 @@ class QueryAgent():
 
             print("RAW CHUNK:", chunk)
 
-            # 1. Check if context changed
+            """# 1. Check if context changed
             if "context" in chunk:
                 print("=== CONTEXT UPDATED ===")
                 print(chunk["context"])
-                print("=======================\n")
+                print("=======================\n")"""
 
             # 2. Standard model output
             if 'model' in chunk:
                 msg =  chunk['model']['messages'][0].content
-                print("MODEL:", chunk['model']['messages'][0].content)
+                #print("MODEL:", chunk['model']['messages'][0].content)#
                 final_answer = msg
 
-            # 3. Tool output
+            """# 3. Tool output
             if 'tools' in chunk:
-                print("TOOL:", chunk['tools']['messages'][0].content)
+                print("TOOL:", chunk['tools']['messages'][0].content)"""
             
         return final_answer.split(FINAL_ANSWER)[-1].strip()
 

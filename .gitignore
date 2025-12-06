@@ -1,2 +1,6 @@
-#Pycache files.
+# Pycache files.
 *.pyc
+
+# Local virtual environment
+.venv
+data

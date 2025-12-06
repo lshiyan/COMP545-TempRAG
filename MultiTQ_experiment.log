@@ -1,0 +1,14 @@
+Starting MultiTQ experiment...
+Loading questions...
+499350
+100
+Processing question 1 / 100
+RAW CHUNK: {'model': {'messages': [AIMessage(content='Question: Who wanted to negotiate with Carlos Lage Dávila in 2006?\nThought: I should search temporal facts for mentions of negotiations involving Carlos Lage Dávila in 2006 and identify the actor who expressed the desire to negotiate.\nAction: functions.retrieve_temporal_facts\nAction Input: {"query":"In 2006, who expressed a desire to negotiate with Carlos Lage Dávila?"}', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 837, 'prompt_tokens': 751, 'total_tokens': 1588, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 704, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_provider': 'openai', 'model_name': 'gpt-5-2025-08-07', 'system_fingerprint': None, 'id': 'chatcmpl-CjVhlZgYAKOYQFmpaTvCXo3KW8mVY', 'service_tier': 'default', 'finish_reason': 'tool_calls', 'logprobs': None}, id='lc_run--019aeff9-1252-7bc0-ac4c-7beaeb93e0ce-0', tool_calls=[{'name': 'retrieve_temporal_facts', 'args': {'query': 'In 2006, who expressed a desire to negotiate with Carlos Lage Dávila?'}, 'id': 'call_VKpRPJvBqEw74Dvt3ba5N3Rj', 'type': 'tool_call'}], usage_metadata={'input_tokens': 751, 'output_tokens': 837, 'total_tokens': 1588, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 704}})]}}
+MODEL: Question: Who wanted to negotiate with Carlos Lage Dávila in 2006?
+Thought: I should search temporal facts for mentions of negotiations involving Carlos Lage Dávila in 2006 and identify the actor who expressed the desire to negotiate.
+Action: functions.retrieve_temporal_facts
+Action Input: {"query":"In 2006, who expressed a desire to negotiate with Carlos Lage Dávila?"}
+RAW CHUNK: {'tools': {'messages': [ToolMessage(content="Error invoking tool 'retrieve_temporal_facts' with kwargs {'query': 'In 2006, who expressed a desire to negotiate with Carlos Lage Dávila?'} with error:\n constraints: Field required\n Please fix the error and try again.", name='retrieve_temporal_facts', id='ddbe0127-684d-43e3-8c87-6c84c8844e2c', tool_call_id='call_VKpRPJvBqEw74Dvt3ba5N3Rj', status='error')]}}
+TOOL: Error invoking tool 'retrieve_temporal_facts' with kwargs {'query': 'In 2006, who expressed a desire to negotiate with Carlos Lage Dávila?'} with error:
+ constraints: Field required
+ Please fix the error and try again.
