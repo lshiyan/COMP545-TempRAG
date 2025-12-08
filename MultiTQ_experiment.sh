@@ -16,6 +16,7 @@
 # EXPERIMENT CONFIG
 # ==========================
 export CUDA_VISIBLE_DEVICES=0
+# Expect OPENAI_API_KEY to be provided in the environment
 QUESTIONS="/work/xinyu/COMP545-TempRAG/data/MultiTQ/full_questions.json"
 INDEX="/work/xinyu/COMP545-TempRAG/data/MultiTQ/full_index.faiss"
 METADATA="/work/xinyu/COMP545-TempRAG/data/MultiTQ/full_metadata.json"
