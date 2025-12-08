@@ -20,17 +20,17 @@ QUESTIONS="/work/xinyu/COMP545-TempRAG/data/MultiTQ/full_questions.json"
 INDEX="/work/xinyu/COMP545-TempRAG/data/MultiTQ/full_index.faiss"
 METADATA="/work/xinyu/COMP545-TempRAG/data/MultiTQ/full_metadata.json"
 
-SAMPLE_BY="qtype"      # ["any", "qtype", "qlabel", "answer_type", "time_level"]
-SAMPLE_N=30       # sample size per group (ignored if SAMPLE_BY=any)
+SAMPLE_BY="any"      # ["any", "qtype", "qlabel", "answer_type", "time_level"]
+SAMPLE_N=150       # sample size per group (ignored if SAMPLE_BY=any)
 
-SIM_TOP_K=2000           # FAISS retrieval size
+SIM_TOP_K=10000          # FAISS retrieval size
 RERANK_TOP_K=50        # reranker selection
 
 # ==========================
 # RUN PROGRAM
 # ==========================
 
-LOG_FILE="logs/MultiTQ_experiment_${SAMPLE_BY}_gpu${CUDA_VISIBLE_DEVICES}_trial2.log"
+LOG_FILE="logs/MultiTQ_experiment_${SAMPLE_BY}_gpu${CUDA_VISIBLE_DEVICES}_SIM_TOP_K${SIM_TOP_K}_trial2.log"
 echo "Logging to ${LOG_FILE}"
 
 nohup python3 -m experiments.MultiTQ \
